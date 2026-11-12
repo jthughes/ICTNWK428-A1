@@ -12,7 +12,7 @@ function Get-OSInfo {
     $info = Get-ComputerInfo -Property $Parameters
     $info | Add-Member -MemberType NoteProperty -Name "WinRMStatus" -Value $RemoteServiceStatus
 
-    $output = $info | Format-List (
+    $output = $info | Select-Object (
         @{
             Name='OperatingSystemName'
             Expression={$_.OsName}
@@ -45,14 +45,21 @@ function Get-OSInfo {
     Write-Output $output
 }
 
+function Get-OSName {
+    $info = Get-OSInfo
+    Write-Output $info.ComputerName
+}
+
 function Start-Program {
     $optionExit = 9
     $prompt = 0
     while ($prompt -ne $optionExit) {
         Show-Menu
         $prompt = Read-Host "Select Menu Option [#]"
+        Write-Host ""
         try {
             switch ($prompt) {
+                1 { Write-Host "Operating System Name: $(Get-OSName)" }
                 8 { Get-OSInfo | Format-List }
                 $optionExit { Write-Host "Goodbye!"}
                 default     { Write-Host "Input not recognised" }
@@ -60,6 +67,7 @@ function Start-Program {
         } catch {
             Write-Host = "Error"
         }
+        Write-Host ""
     }
 }
 
