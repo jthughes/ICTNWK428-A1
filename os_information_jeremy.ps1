@@ -47,7 +47,32 @@ function Get-OSInfo {
 
 function Get-OSName {
     $info = Get-OSInfo
+    Write-Output $info.OperatingSystemName
+}
+
+function Get-RemoteServiceStatus {
+    $info = Get-OSInfo
+    Write-Output $info.WindowsRemoteServiceStatus
+}
+
+function Get-ComputerManufacturerAndModel {
+    $info = Get-OSInfo
+    Write-Output "$($info.ComputerManufacturer) $($info.ComputerModel)"
+}
+
+function Get-ComputerName {
+    $info = Get-OSInfo
     Write-Output $info.ComputerName
+}
+
+function Get-ComputerDomainName {
+    $info = Get-OSInfo
+    Write-Output $info.ComputerDomainName
+}
+
+function Get-OSArchitecture {
+    $info = Get-OSInfo
+    Write-Output $info.OperatingSystemArchitecture
 }
 
 function Start-Program {
@@ -60,6 +85,12 @@ function Start-Program {
         try {
             switch ($prompt) {
                 1 { Write-Host "Operating System Name: $(Get-OSName)" }
+                2 { Write-Host "Windows Remote Service Status: $(Get-RemoteServiceStatus)" }
+                3 { Write-Host "Computer Manufacturer and Model: $(Get-ComputerManufacturerAndModel)" }
+                4 { Write-Host "Computer Name: $(Get-ComputerName)" }
+                5 { Write-Host "Computer Domain Name: $(Get-ComputerDomainName)" }
+                # 6 { Write-Host "Trusted Hosts: $(Get-TrustedHosts)" }
+                7 { Write-Host "Operating System Architecture: $(Get-OSArchitecture)" }
                 8 { Get-OSInfo | Format-List }
                 $optionExit { Write-Host "Goodbye!"}
                 default     { Write-Host "Input not recognised" }
