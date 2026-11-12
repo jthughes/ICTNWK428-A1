@@ -1,5 +1,4 @@
 function Get-OSInfo {
-    $RemoteServiceStatus = (Get-Service -Name "WinRM").Status
     $Parameters = @(
         "OsName",
         "OsVersion"
@@ -10,74 +9,53 @@ function Get-OSInfo {
         "OsArchitecture"
     )
     $info = Get-ComputerInfo -Property $Parameters
-    $info | Add-Member -MemberType NoteProperty -Name "WinRMStatus" -Value $RemoteServiceStatus
-
-    $output = $info | Select-Object (
-        @{
-            Name='OperatingSystemName'
-            Expression={$_.OsName}
-        },
-        @{
-            Name='WindowsRemoteServiceStatus'
-            Expression={$_.WinRMStatus}
-        },
-        @{
-            Name='ComputerManufacturer'
-            Expression={$_.CsManufacturer}
-        },
-        @{
-            Name='ComputerModel'
-            Expression={$_.CsModel}
-        },
-        @{
-            Name='ComputerName'
-            Expression={$_.CsName}
-        },
-        @{
-            Name='ComputerDomainName'
-            Expression={$_.CsDomain}
-        },
-        @{
-            Name='OperatingSystemArchitecture'
-            Expression={$_.OsArchitecture}
-        }
-    )
-    Write-Output $output
+    Write-Output $info
 }
 
 function Get-OSName {
     $info = Get-OSInfo
-    Write-Output $info.OperatingSystemName
+    Write-Output $info.OsName
 }
 
 function Get-RemoteServiceStatus {
-    $info = Get-OSInfo
-    Write-Output $info.WindowsRemoteServiceStatus
+    Write-Output (Get-Service -Name "WinRM").Status
 }
 
 function Get-ComputerManufacturerAndModel {
     $info = Get-OSInfo
-    Write-Output "$($info.ComputerManufacturer) $($info.ComputerModel)"
+    Write-Output "$($info.CsManufacturer) $($info.CsModel)"
 }
 
 function Get-ComputerName {
     $info = Get-OSInfo
-    Write-Output $info.ComputerName
+    Write-Output $info.CsName
 }
 
 function Get-ComputerDomainName {
     $info = Get-OSInfo
-    Write-Output $info.ComputerDomainName
+    Write-Output $info.CsDomain
 }
 
+function Get-TrustedHosts {
+    Write-Output $(Get-ITem WSMan:\localhost\Client\TrustedHosts).Value
+}
 function Get-OSArchitecture {
     $info = Get-OSInfo
-    Write-Output $info.OperatingSystemArchitecture
+    Write-Output $info.OsArchitecture
+}
+
+function Get-AllOSInfo {
+    $info = Get-OSInfo
+    $info | Add-Member -MemberType NoteProperty -Name "WinRMStatus" -Value (Get-RemoteServiceStatus)
+    $info | Add-Member -MemberType NoteProperty -Name "TrustedHosts" -Value (Get-TrustedHosts)
+    Write-Output $info
 }
 
 function Start-Program {
     $optionExit = 9
     $prompt = 0
+
+    $osInfo
     while ($prompt -ne $optionExit) {
         Show-Menu
         $prompt = Read-Host "Select Menu Option [#]"
@@ -89,9 +67,9 @@ function Start-Program {
                 3 { Write-Host "Computer Manufacturer and Model: $(Get-ComputerManufacturerAndModel)" }
                 4 { Write-Host "Computer Name: $(Get-ComputerName)" }
                 5 { Write-Host "Computer Domain Name: $(Get-ComputerDomainName)" }
-                # 6 { Write-Host "Trusted Hosts: $(Get-TrustedHosts)" }
+                6 { Write-Host "Trusted Hosts: $(Get-TrustedHosts)" }
                 7 { Write-Host "Operating System Architecture: $(Get-OSArchitecture)" }
-                8 { Get-OSInfo | Format-List }
+                8 { Get-AllOSInfo | Format-List }
                 $optionExit { Write-Host "Goodbye!"}
                 default     { Write-Host "Input not recognised" }
             }
