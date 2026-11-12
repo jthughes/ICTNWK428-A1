@@ -1,3 +1,49 @@
+function Get-OSInfo {
+    $RemoteServiceStatus = (Get-Service -Name "WinRM").Status
+    $Parameters = @(
+        "OsName",
+        "OsVersion"
+        "CsManufacturer",
+        "CsModel",
+        "CsName",
+        "CsDomain",
+        "OsArchitecture"
+    )
+    $info = Get-ComputerInfo -Property $Parameters
+    $info | Add-Member -MemberType NoteProperty -Name "WinRMStatus" -Value $RemoteServiceStatus
+
+    $output = $info | Format-List (
+        @{
+            Name='OperatingSystemName'
+            Expression={$_.OsName}
+        },
+        @{
+            Name='WindowsRemoteServiceStatus'
+            Expression={$_.WinRMStatus}
+        },
+        @{
+            Name='ComputerManufacturer'
+            Expression={$_.CsManufacturer}
+        },
+        @{
+            Name='ComputerModel'
+            Expression={$_.CsModel}
+        },
+        @{
+            Name='ComputerName'
+            Expression={$_.CsName}
+        },
+        @{
+            Name='ComputerDomainName'
+            Expression={$_.CsDomain}
+        },
+        @{
+            Name='OperatingSystemArchitecture'
+            Expression={$_.OsArchitecture}
+        }
+    )
+    Write-Output $output
+}
 
 function Start-Program {
     $optionExit = 9
@@ -5,13 +51,16 @@ function Start-Program {
     while ($prompt -ne $optionExit) {
         Show-Menu
         $prompt = Read-Host "Select Menu Option [#]"
-        switch ($prompt) {
-            $optionExit { Write-Host "Goodbye!"}
-            default     { Write-Host "Input not recognised" }
+        try {
+            switch ($prompt) {
+                8 { Get-OSInfo | Format-List }
+                $optionExit { Write-Host "Goodbye!"}
+                default     { Write-Host "Input not recognised" }
+            }
+        } catch {
+            Write-Host = "Error"
         }
-        Write-Host ""
     }
-
 }
 
 function Show-Menu {
